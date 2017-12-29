@@ -1,2 +1,7 @@
 
 ref/
+my_captcha_img/
+my_single_letter/
+extracted_letter_images/
+generated_captcha_images/
+img/output/

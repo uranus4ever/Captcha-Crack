@@ -6,9 +6,13 @@ import random
 import string
 import imutils
 import scipy.misc
+import os
+import glob
 
-CAPTCHA_IMAGE_FOLDER = "./generated_captcha_images/"
-OUTPUT_FOLDER = "./extracted_letter_images/"
+# CAPTCHA_IMAGE_FOLDER = "./my_captcha_img/"
+# OUTPUT_FOLDER = "./my_single_letter/"
+CAPTCHA_IMAGE_FOLDER = "./1/"
+OUTPUT_FOLDER = "./2/"
 
 # Generate random codes, len=4
 characters = string.digits + string.ascii_uppercase
@@ -16,6 +20,20 @@ print("Using characters: \n" + characters)
 
 width, height, n_len, n_class = 170, 80, 4, len(characters)
 generator = ImageCaptcha(width=width, height=height)
+
+
+def save_captcha(num=100):
+    for i in range(num):
+        print("Saving images...{}/{}".format(i+1, num))
+
+        random_str = ''.join([random.choice(characters) for j in range(4)])
+        img = generator.generate_image(random_str)
+
+        save_path = os.path.join(CAPTCHA_IMAGE_FOLDER, random_str)
+
+        # write the image to a file
+        p = os.path.join(CAPTCHA_IMAGE_FOLDER, "{}.png".format(str(random_str)))
+        _save = cv2.imwrite(p, np.asarray(img))
 
 
 def gen(batch_size=32):
@@ -32,39 +50,19 @@ def gen(batch_size=32):
         yield X, y
 
 
-def gen_single_letter(batch_size=32):
-    new_height, new_width = 20, 20
-    X = np.zeros((batch_size, height, width, 3), dtype=np.uint8)
-    X_letter = np.zeros((batch_size, 4, new_height, new_height, 1), dtype=np.uint8)
-    y = [np.zeros((batch_size, n_class), dtype=np.uint8) for i in range(n_len)]
-    generator = ImageCaptcha(width=width, height=height)
-    while True:
-        for i in range(batch_size):
-            random_str = ''.join([random.choice(characters) for j in range(4)])
-            X[i] = generator.generate_image(random_str)
-            letters = extract(X[i], random_str)
-            for num in range(4):
-                X_letter[i][num] = resize(letters[num], (new_height, new_width))
-            for j, ch in enumerate(random_str):
-                y[j][i, :] = 0
-                y[j][i, characters.find(ch)] = 1
-        yield X_letter, y
-
-
 def decode(y):
     y = np.argmax(np.array(y), axis=2)[:, 0]
     return ''.join([characters[x] for x in y])
 
 
-def extract(img, str, plot=False):
+def extract(img, str='CODE', plot=False):
     '''    
     extract the 4 codes from img
-    :param img: PIL Image
+    :param img: cv2 imread BGR Image
     :return: regions contains (x, y, w, h)
     '''
-    img_array = np.asarray(img)
-    # convert PIL image to cv2 gray image
-    gray = cv2.cvtColor(img_array, cv2.COLOR_RGB2GRAY)
+
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
     # threshold the image (convert it to pure black and white)
     thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
@@ -83,7 +81,7 @@ def extract(img, str, plot=False):
         # Get the rectangle that contains the contour
         (x, y, w, h) = cv2.boundingRect(contour)
 
-        if (w < 10) & (h < 10):
+        if (w < 15) & (h < 20):
             continue
 
         # Compare the width and height of the contour to detect letters that
@@ -129,8 +127,8 @@ def extract(img, str, plot=False):
         plt.subplot(2, 2, 1)
         for i in range(len(letter_image_regions)):
             x, y, w, h = letter_image_regions[i]
-            cv2.rectangle(img_array, (x, y), (x+w, y+h), color=(255, 0, 0), thickness=1)
-        plt.imshow(img_array)
+            cv2.rectangle(img, (x, y), (x+w, y+h), color=(255, 0, 0), thickness=1)
+        plt.imshow(img)
         plt.title(str)
         plt.axis('off')
 
@@ -143,19 +141,12 @@ def extract(img, str, plot=False):
             plt.imshow(resize(letters[i], (30, 20)), cmap='gray')
             plt.axis('off')
 
-        # plt.subplot(2, 2, 3)
-        # plt.imshow(blur_img, 'gray')
-        # plt.axis('off')
-        # plt.subplot(2, 2, 4)
-        # plt.imshow()
-        # plt.axis('off')
-
         plt.show()
 
-    return letters
+    return letter_image_regions
 
 
-def blur(img, size=5):
+def blur(img, size=7):
     '''
     To filter salt noise with medianBlur
     :param img: PIL image
@@ -179,10 +170,55 @@ def plotimg(img):
 
 
 if __name__ == "__main__":
-    # random_str, img = generate_code()
-    # regions = extract(img, random_str, plot=True)
+    save_captcha(num=10)
+    # Get a list of all the captcha images we need to process
+    captcha_image_files = glob.glob(os.path.join(CAPTCHA_IMAGE_FOLDER, "*"))
+    counts = {}
 
-    X, y = next(gen(1))
-    letters = extract(X[0], decode(y), plot=True)
+    # loop over the image paths
+    for (i, captcha_image_file) in enumerate(captcha_image_files):
+        print("[INFO] processing image {}/{}".format(i + 1, len(captcha_image_files)))
 
+        # Since the filename contains the captcha text (i.e. "2A2X.png" has the text "2A2X"),
+        # grab the base filename as the text
+        filename = os.path.basename(captcha_image_file)
+        captcha_correct_text = os.path.splitext(filename)[0]
 
+        # Load the image and convert it to grayscale
+        image = cv2.imread(captcha_image_file)
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+        letter_image_regions = extract(image, str=captcha_correct_text)
+
+        # If we found more or less than 4 letters in the captcha, our letter extraction
+        # didn't work correcly. Skip the image instead of saving bad training data!
+        if len(letter_image_regions) != 4:
+            continue
+
+        # Sort the detected letter images based on the x coordinate to make sure
+        # we are processing them from left-to-right so we match the right image
+        # with the right letter
+        letter_image_regions = sorted(letter_image_regions, key=lambda x: x[0])
+
+        # Save out each letter as a single image
+        for letter_bounding_box, letter_text in zip(letter_image_regions, captcha_correct_text):
+            # Grab the coordinates of the letter in the image
+            x, y, w, h = letter_bounding_box
+
+            # Extract the letter from the original image with a 2-pixel margin around the edge
+            letter_image = gray[y - 1:y + h + 1, x - 1:x + w + 1]
+
+            # Get the folder to save the image in
+            save_path = os.path.join(OUTPUT_FOLDER, letter_text)
+
+            # if the output directory does not exist, create it
+            if not os.path.exists(save_path):
+                os.makedirs(save_path)
+
+            # write the letter image to a file
+            count = counts.get(letter_text, 1)
+            p = os.path.join(save_path, "{}.png".format(str(count).zfill(6)))
+            cv2.imwrite(p, letter_image)
+
+            # increment the count for the current key
+            counts[letter_text] = count + 1
