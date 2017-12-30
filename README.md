@@ -45,7 +45,7 @@ OpenCV
 
 15代训练后，单个字符的准确率为97.7%，CPU计算时间，大概5分钟不到。
 
-![acc][img6]
+![acc][img9]
 
 ### 预测和评估
 使用训练完的权重进行预测，把四个字符标签都一一对应算作识别成功，准确率大概在50%。考虑到可以让程序不断尝试提交，在网速能保证的情况下基本满足要求。
@@ -77,3 +77,4 @@ OpenCV
 [gif]: https://github.com/uranus4ever/Captcha-Crack/blob/master/img/predict.gif
 [img7]: https://github.com/uranus4ever/Captcha-Crack/blob/master/img/slide.png
 [img8]: https://github.com/uranus4ever/Captcha-Crack/blob/master/img/12306.png
+[img9]: https://github.com/uranus4ever/Captcha-Crack/blob/master/img/acc.png
