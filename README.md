@@ -11,6 +11,7 @@ CAPTCHA验证码是目前互联网上常见的一种图灵测试，用来区别�
 ![login pic][img1]
 
 但是上图中的验证码白底黑字，间距分明，显得过于简单了，为了增加挑战性，采取了以下这种验证码。而且，在Python中，可以通过加载`capthcha.image`工具库就能轻松地生成。
+
 ![captcha example][img2]
 
 ## 使用方法：
@@ -39,9 +40,11 @@ OpenCV
 ### 卷积神经网络模型
 
 两层的网络就足够啦。
+
 ![model structure][img5]
 
 15代训练后，单个字符的准确率为97.7%，CPU计算时间，大概5分钟不到。
+
 ![acc][img6]
 
 ### 预测和评估
@@ -56,6 +59,7 @@ OpenCV
 ![slide code][img7]
 
 但是，遇到12306这种丧心病狂的，也只能尴尬地微笑了o(*￣︶￣*)o
+
 ![12306][img8]
 
 参考资料：
@@ -64,12 +68,12 @@ OpenCV
 3. [滑块验证码（滑动验证码）相比图形验证码，破解难度如何？](https://www.zhihu.com/question/32209043)
 
 [//]: # (Image References)
-[img1]: https://github.com/uranus4ever/Captcha-Crack/tree/master/img/login.png
-[img2]: https://github.com/uranus4ever/Captcha-Crack/tree/master/img/GA9L.png
-[img3]: https://github.com/uranus4ever/Captcha-Crack/tree/master/img/pipeline.png
-[img4]: https://github.com/uranus4ever/Captcha-Crack/tree/master/img/split.png
-[img5]: https://github.com/uranus4ever/Captcha-Crack/tree/master/img/model.png
-[img6]: https://github.com/uranus4ever/Captcha-Crack/tree/master/img/HACK.png
-[gif]: https://github.com/uranus4ever/Captcha-Crack/tree/master/img/predict.gif
-[img7]: https://github.com/uranus4ever/Captcha-Crack/tree/master/img/slide.png
-[img8]: https://github.com/uranus4ever/Captcha-Crack/tree/master/img/12306.png
+[img1]: https://github.com/uranus4ever/Captcha-Crack/blob/master/img/login.png
+[img2]: https://github.com/uranus4ever/Captcha-Crack/blob/master/img/GA9L.png
+[img3]: https://github.com/uranus4ever/Captcha-Crack/blob/master/img/pipeline.png
+[img4]: https://github.com/uranus4ever/Captcha-Crack/blob/master/img/split.png
+[img5]: https://github.com/uranus4ever/Captcha-Crack/blob/master/img/model.png
+[img6]: https://github.com/uranus4ever/Captcha-Crack/blob/master/img/HACK.png
+[gif]: https://github.com/uranus4ever/Captcha-Crack/blob/master/img/predict.gif
+[img7]: https://github.com/uranus4ever/Captcha-Crack/blob/master/img/slide.png
+[img8]: https://github.com/uranus4ever/Captcha-Crack/blob/master/img/12306.png
