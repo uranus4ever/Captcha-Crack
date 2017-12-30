@@ -9,10 +9,8 @@ import scipy.misc
 import os
 import glob
 
-# CAPTCHA_IMAGE_FOLDER = "./my_captcha_img/"
-# OUTPUT_FOLDER = "./my_single_letter/"
-CAPTCHA_IMAGE_FOLDER = "./1/"
-OUTPUT_FOLDER = "./2/"
+CAPTCHA_IMAGE_FOLDER = "./my_captcha_img/"
+OUTPUT_FOLDER = "./my_single_letter/"
 
 # Generate random codes, len=4
 characters = string.digits + string.ascii_uppercase

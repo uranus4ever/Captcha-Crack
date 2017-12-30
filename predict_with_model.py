@@ -5,12 +5,13 @@ import numpy as np
 import cv2
 import pickle
 
-
 MODEL_FILENAME = "captcha_model.hdf5"
 MODEL_LABELS_FILENAME = "model_labels.dat"
 CAPTCHA_IMAGE_FOLDER = "./my_captcha_img/"
 PREDICT_OUTPUT = "./img/output/"
 
+test_size = 100
+correct_num = 0
 
 # Load up the model labels (so we can translate model predictions to actual letters)
 with open(MODEL_LABELS_FILENAME, "rb") as f:
@@ -23,7 +24,7 @@ model = load_model(MODEL_FILENAME)
 # In the real world, you'd replace this section with code to grab a real
 # CAPTCHA image from a live website.
 captcha_image_files = list(paths.list_images(CAPTCHA_IMAGE_FOLDER))
-captcha_image_files = np.random.choice(captcha_image_files, size=(40,), replace=False)
+captcha_image_files = np.random.choice(captcha_image_files, size=(test_size,), replace=False)
 
 # loop over the image paths
 for image_file in captcha_image_files:
@@ -59,7 +60,7 @@ for image_file in captcha_image_files:
         letter_image = gray[y - 1:y + h + 1, x - 1:x + w + 1]
 
         # Re-size the letter image to 20x20 pixels to match training data
-        letter_image = resize(letter_image, (20, 20))
+        letter_image = resize(blur(letter_image), (20, 20))
 
         # Turn the single image into a 4d list of images to make Keras happy
         letter_image = np.expand_dims(letter_image, axis=2)
@@ -86,4 +87,8 @@ for image_file in captcha_image_files:
 
     # Save the output
     str = ''.join(i for i in predictions)
-    _cv2imwrite = cv2.imwrite(PREDICT_OUTPUT+label+".jpg", image)
+    if captcha_text == label:
+        correct_num += 1
+        _cv2imwrite = cv2.imwrite(PREDICT_OUTPUT+label+".jpg", image)
+
+print("Test num = {} \nCorrect num = {} \nAcc = {}".format(test_size, correct_num, correct_num/test_size))

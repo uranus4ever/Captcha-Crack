@@ -1,8 +1,5 @@
-from keras.models import *
-from keras.layers import *
-from tqdm import tqdm
-# from keras.utils.visualize_util import plot
-from IPython.display import Image
+from keras.models import Sequential
+from keras.layers import Conv2D, MaxPooling2D, Dense, Flatten
 from captcha_generator import *
 from imutils import paths
 import pickle
@@ -20,6 +17,9 @@ MODEL_LABELS_FILENAME = "model_labels.dat"
 
 
 # initialize the data and labels
+image_files = paths.list_images(LETTER_IMAGES_FOLDER)
+num = len(list(image_files))
+# data = np.zeros((num, new_height, new_width, 1), dtype="float")
 data = []
 labels = []
 
@@ -30,16 +30,20 @@ for image_file in paths.list_images(LETTER_IMAGES_FOLDER):
     image = cv2.imread(image_file)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
+    # blur the image to eliminate noise
+    blur_img = blur(image)
+
     # Resize the letter so it fits in a 20x20 pixel box
-    image = resize(image, (20, 20))
+    image = resize(blur_img, (new_height, new_width))
 
     # Add a third channel dimension to the image to make Keras happy
     image = np.expand_dims(image, axis=2)
 
     # Grab the name of the letter based on the folder it was in
-    label = image_file.split(os.path.sep)[-2]
+    label = image_file.split(os.path.sep)[-2].split('/')[-1]
 
     # Add the letter image and it's label to our training data
+    # data[i] = image
     data.append(image)
     labels.append(label)
 
